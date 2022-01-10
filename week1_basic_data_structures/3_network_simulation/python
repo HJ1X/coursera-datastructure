@@ -1,0 +1,85 @@
+###### ------------------------------------------------------------ Date - !5 may 2021 - code backup ----------------------------------------------------------------- ######
+
+#Imports
+from collections import namedtuple
+from queue import Queue
+
+package = namedtuple('package', ['arrival_time', 'processing_time'])
+
+
+def add_dropped_packages(dropped_packages, process_start_time_list):
+    for dropped_package in dropped_packages:
+        if dropped_package < len(dropped_packages):
+            process_start_time_list.insert(dropped_package, -1)
+        else:
+            process_start_time_list.append(-1)
+
+
+def clear_buffer(buffer, process_start_time_list, finish_time):
+    wait_time = 0
+
+    while not buffer.empty():
+        curr_arrival_time, curr_processing_time = buffer.get_nowait()
+        
+        if finish_time > curr_arrival_time:
+            wait_time = finish_time - curr_arrival_time
+
+        finish_time = wait_time + curr_arrival_time + curr_processing_time
+        process_start_time_list.append(curr_arrival_time + wait_time)
+
+
+
+def process_package(buffer_size, packages):
+    buffer = Queue(maxsize=buffer_size)
+    process_start_time_list = []
+    droped_packages = []
+
+    wait_time = 0
+    finish_time = 0
+
+    for package_no in range(len(packages)):
+        if not buffer.full():
+            buffer.put_nowait(packages[package_no])
+        else:
+            process_completed_count = 0
+
+            while packages[package_no].arrival_time >= finish_time:
+                if not buffer.empty():
+                    curr_arrival_time, curr_processing_time = buffer.get_nowait()
+                else:
+                    break
+                
+                if finish_time > curr_arrival_time:
+                    wait_time = finish_time - curr_arrival_time
+
+                finish_time = wait_time + curr_arrival_time + curr_processing_time
+
+                process_start_time_list.append(curr_arrival_time + wait_time)
+                process_completed_count += 1
+
+            if not process_completed_count:
+                droped_packages.append(package_no)            
+            else:
+                buffer.put_nowait(packages[package_no])
+
+    clear_buffer(buffer, process_start_time_list, finish_time)
+    add_dropped_packages(droped_packages, process_start_time_list)
+
+    return process_start_time_list
+
+
+def main():
+    buffer_size, no_of_packages = map(int, input().split())
+    packages = []
+    for i in range(no_of_packages):
+        arrival_time, processing_time = map(int, input().split())
+        packages.append(package(arrival_time, processing_time))
+    process_start_time = process_package(buffer_size, packages)
+    for i in process_start_time:
+        print(i)
+
+
+if __name__ == '__main__':
+    main()
+
+########## ------------------------------------------------------------------------------------------------------------------------------------------------------- ############
