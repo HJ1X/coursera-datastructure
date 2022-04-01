@@ -1,18 +1,15 @@
 # python3
 
-from os import path
-from importlib import import_module
 from collections import deque
 
-### ------------------------------------------------------------------------------- Classes ------------------------------------------------------------------------- ###
 
-
-class StackWithMax():
+# ------------------------------------------------------- Classes --------------------------------------------------- #
+class StackWithMax:
     def __init__(self):
         self.__stack = deque()
         self.__max = deque()
 
-    def Push(self, a):
+    def push(self, a):
         self.__stack.append(a)
         if not self.__max:
             self.__max.append(a)
@@ -20,59 +17,56 @@ class StackWithMax():
         if a >= self.__max[-1]:
             self.__max.append(a)
 
-    def Pop(self):
+    def pop(self):
         assert(len(self.__stack))
         val = self.__stack.pop()
         if self.__max[-1] == val:
             self.__max.pop()
         return val
 
-    def Max(self):
+    def max(self):
         if not len(self.__stack):
             return -1
         return self.__max[-1]
 
-    def isEmpty(self):
+    def is_empty(self):
         if len(self.__stack):
             return False
         else:
             return True
 
 
-class QueueUsingStack():
+class QueueUsingStack:
     def __init__(self):
         self.__stack1 = StackWithMax()
         self.__stack2 = StackWithMax()
 
     def enque(self, value):
-        self.__stack1.Push(value)
+        self.__stack1.push(value)
 
     def deque(self):
-        if self.__stack2.isEmpty():
-            if self.__stack1.isEmpty():
+        if self.__stack2.is_empty():
+            if self.__stack1.is_empty():
                 raise IndexError('Could not deque from empty queue')
 
-            while not self.__stack1.isEmpty():
-                val = self.__stack1.Pop()
-                self.__stack2.Push(val)
+            while not self.__stack1.is_empty():
+                val = self.__stack1.pop()
+                self.__stack2.push(val)
             
-        return self.__stack2.Pop()
+        return self.__stack2.pop()
 
     def max(self):
-        return max(self.__stack1.Max(), self.__stack2.Max())
-            
+        return max(self.__stack1.max(), self.__stack2.max())
 
-### ----------------------------------------------------------------------------------------------------------------------------------------------------------------- ###
 
-### ---------------------------------------------------------------------------- Functions -------------------------------------------------------------------------- ###
-
+# ---------------------------------------------------- Functions ---------------------------------------------------- #
 def max_sliding_deque_relevant_items(sequence, window_size):
     dq = deque()
     maximums = []
 
     for curr_index in range(len(sequence)):
         
-        # removng first element if out of window
+        # removing first element if out of window
         if dq and dq[0] <= curr_index - window_size:
             dq.popleft()
 
@@ -97,9 +91,7 @@ def max_sliding_window_blocks(sequence, n):
         else:
             prefix.append(max(prefix[i - 1], sequence[i]))
 
-    suffix = []
-    # for i in range(len(sequence) - 1, -1, -1):
-    suffix.append(sequence[-1])
+    suffix = [sequence[-1]]
     for i in reversed(range(len(sequence) - 1)):
         if i % n == 0:
             suffix.insert(0, sequence[i])
@@ -129,16 +121,6 @@ def max_sliding_queue_using_stack(sequence, n):
         window.deque()
         maximums.append(window.max())
 
-    # window = deque()
-    # for i in range(n):
-    #     window.append(sequence[i])
-    # maximums.append(max(window))
-
-    # for i in range(n, len(sequence)):
-    #     window.append(sequence[i])
-    #     window.popleft()
-    #     maximums.append(max(window))
-
     return maximums
 
 
@@ -149,13 +131,17 @@ def max_sliding_window_naive(sequence, m):
 
     return maximums
 
-### ----------------------------------------------------------------------------------------------------------------------------------------------------------------- ###
+# ------------------------------------------------------------------------------------------------------------------- #
 
 
-if __name__ == '__main__':
+def main():
     n = int(input())
     input_sequence = [int(i) for i in input().split()]
     assert len(input_sequence) == n
     window_size = int(input())
 
     print(*max_sliding_deque_relevant_items(input_sequence, window_size))
+
+
+if __name__ == '__main__':
+    main()
